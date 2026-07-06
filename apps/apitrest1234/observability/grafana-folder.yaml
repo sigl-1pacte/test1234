@@ -1,0 +1,13 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: valentin-team-apitrest1234
+  namespace: observability
+  labels:
+    project: apitrest1234
+    team: valentin-team
+spec:
+  title: "valentin-team / apitrest1234"
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
