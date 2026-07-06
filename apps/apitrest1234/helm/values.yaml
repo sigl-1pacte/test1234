@@ -1,0 +1,18 @@
+workload:
+  name: apitrest1234
+replicaCount: 1
+labels:
+  classification: public
+  environment: dev
+  team: valentin-team
+  cnp.io/logging: enabled
+  project: apitrest1234
+service:
+  port: 8000
+  targetPort: 8000
+container:
+  port: 8000
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
