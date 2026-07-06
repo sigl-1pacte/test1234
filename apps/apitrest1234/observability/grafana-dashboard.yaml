@@ -1,0 +1,54 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: apitrest1234-logs
+  namespace: observability
+  labels:
+    project: apitrest1234
+    team: valentin-team
+spec:
+  folderRef: valentin-team-apitrest1234
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  json: |
+    {
+      "uid": "cnp-valentin-team-apitrest1234-logs",
+      "title": "apitrest1234 logs",
+      "schemaVersion": 39,
+      "version": 1,
+      "tags": [
+        "cnp",
+        "loki",
+        "apitrest1234",
+        "valentin-team"
+      ],
+      "timezone": "browser",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "panels": [
+        {
+          "id": 1,
+          "type": "logs",
+          "title": "Pod logs",
+          "datasource": {
+            "type": "loki",
+            "uid": "Loki"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "{team=\"valentin-team\", project=\"apitrest1234\"}"
+            }
+          ],
+          "gridPos": {
+            "h": 20,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          }
+        }
+      ]
+    }
