@@ -1,0 +1,82 @@
+{
+  "argocd": {
+    "autoSync": true,
+    "enabled": true,
+    "prune": false,
+    "repositoryTarget": "",
+    "revision": "main",
+    "selfHeal": true
+  },
+  "database": {},
+  "description": "",
+  "environments": [
+    "dev"
+  ],
+  "features": {
+    "ci": true,
+    "envConfig": false,
+    "logger": true,
+    "yamlConfig": false
+  },
+  "helm": {
+    "appPort": 8000,
+    "config": {
+      "logLevel": "INFO"
+    },
+    "enabled": true,
+    "host": "apitrest1234.test1234.cnp.1pacte.tech",
+    "ingressEnabled": true,
+    "replicas": 1,
+    "resources": {
+      "requests": {
+        "cpu": "500m",
+        "memory": "512Mi"
+      }
+    },
+    "servicePort": 8000,
+    "tlsEnabled": false
+  },
+  "kind": "service",
+  "observability": {
+    "backend": "loki",
+    "collector": "alloy",
+    "grafana": {
+      "datasource": "Loki",
+      "folderName": "valentin-team-apitrest1234",
+      "folderTitle": "valentin-team / apitrest1234",
+      "path": "/d/cnp-valentin-team-apitrest1234-logs/apitrest1234-logs?orgId=1&var-team=valentin-team&var-project=apitrest1234",
+      "provisioning": "grafana-operator",
+      "teamSubspacePath": "/teams/valentin-team/observability/logs"
+    },
+    "labelSelector": "cnp.io/logging=enabled,project=apitrest1234,team=valentin-team",
+    "logsEnabled": true,
+    "requiredPodLabels": {
+      "cnp.io/logging": "enabled",
+      "project": "apitrest1234",
+      "team": "valentin-team"
+    }
+  },
+  "owner": "",
+  "projectName": "apitrest1234",
+  "projectSlug": "test1234",
+  "repository": {
+    "githubOrg": "sigl-1pacte",
+    "private": false
+  },
+  "routing": {
+    "reason": "No sensitive data declared; AWS EKS is the public managed cluster target.",
+    "targetCluster": "aws-eks"
+  },
+  "security": {
+    "containsSensitiveData": false,
+    "dataClassification": "public",
+    "publicExposure": true,
+    "requiresSecrets": false
+  },
+  "teamName": "valentin-team",
+  "template": {
+    "appType": "python-api",
+    "framework": "fastapi",
+    "language": "python"
+  }
+}
