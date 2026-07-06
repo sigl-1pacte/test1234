@@ -1,0 +1,81 @@
+name: CI (apitrest1234)
+
+on:
+  pull_request:
+    paths: ['apps/apitrest1234/**']
+  push:
+    branches: [main, dev]
+    paths: ['apps/apitrest1234/**']
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  apitrest1234:
+    name: apitrest1234
+    uses: ./.github/workflows/ci-apitrest1234.yml
+    with:
+      app-name: apitrest1234
+      python-version: "3.12"
+
+  deploy:
+    name: deploy
+    needs: apitrest1234
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build and push image
+        run: |
+          IMAGE_REPO="ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-apitrest1234"
+          IMAGE="$IMAGE_REPO:${{ github.sha }}"
+          echo "IMAGE_REPO=$IMAGE_REPO" >> "$GITHUB_ENV"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          echo "${{ secrets.GHCR_PACKAGES_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
+          docker build -t "$IMAGE" apps/apitrest1234
+          docker push "$IMAGE"
+
+      - name: Update cnp-gitops
+        run: |
+          set -euo pipefail
+          git config --global user.name "cnp-ci[bot]"
+          git config --global user.email "cnp-ci[bot]@users.noreply.github.com"
+          git clone "https://x-access-token:${{ secrets.GHCR_GITOPS_TOKEN }}@github.com/sigl-1pacte/cnp-gitops.git" gitops-checkout
+          cd gitops-checkout
+
+          VALUES_FILE="apps/valentin-team/test1234/apitrest1234/values.yaml"
+          ruby -ryaml -e '
+            path, image_repo, image_tag = ARGV
+            values = File.exist?(path) ? YAML.load_file(path) : {}
+            values = {} unless values.is_a?(Hash)
+            values["image"] = {} unless values["image"].is_a?(Hash)
+            values["image"]["repository"] = image_repo
+            values["image"]["tag"] = image_tag
+            values["container"] = {} unless values["container"].is_a?(Hash)
+            values["container"].delete("args")
+            File.write(path, YAML.dump(values))
+          ' "$VALUES_FILE" "${{ env.IMAGE_REPO }}" "${{ github.sha }}"
+
+          git add "$VALUES_FILE"
+          if git diff --cached --quiet; then
+            echo "no changes to commit"
+            exit 0
+          fi
+          git commit -m "deploy(apitrest1234): ${{ github.sha }}"
+
+          for attempt in 1 2 3 4 5; do
+            if git push origin main; then
+              echo "pushed successfully"
+              exit 0
+            fi
+
+            echo "push rejected, attempt $attempt — fetching and rebasing"
+            git fetch origin main
+            git rebase origin/main
+            if [ "$attempt" -eq 5 ]; then
+              echo "::error::failed to push to cnp-gitops after 5 attempts"
+              exit 1
+            fi
+          done
