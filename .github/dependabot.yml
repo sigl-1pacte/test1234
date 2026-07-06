@@ -1,0 +1,6 @@
+version: 2
+updates:
+- package-ecosystem: uv
+  directory: /apps/apitrest1234
+  schedule:
+    interval: weekly
